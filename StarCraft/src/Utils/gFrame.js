@@ -14,7 +14,7 @@ var _$ = function (selector) {
         .trim();
       curSelector = curSelector.substring(0, filterIndex);
     }
-    if (curSelector.contains('#')) {
+    if (curSelector.includes('#')) {
       var id = curSelector.split('#')[1];
       if (result.length) {
         var _result = [];
@@ -24,7 +24,7 @@ var _$ = function (selector) {
         result = _result;
       } else result = result.getElementById(id);
     } else {
-      var TagName = curSelector.contains('.')
+      var TagName = curSelector.includes('.')
         ? curSelector.split('.')[0]
         : curSelector;
       var className = curSelector.split('.')[1];
@@ -85,11 +85,6 @@ var _$ = function (selector) {
   return result;
 };
 
-String.prototype.contains = function (str) {
-  //return this.search(str)!=-1;
-  return this.indexOf(str) != -1;
-};
-
 window.requestAnimationFrame =
   requestAnimationFrame ||
   window.webkitRequestAnimationFrame ||
@@ -101,45 +96,19 @@ window.requestAnimationFrame =
 
 //Gobj is game object,initial by only one parameter props
 Function.prototype.extends = function (addInObject) {
-  //father call extends to produce child
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  var father = this;
-  //Create child self as constructor function
-  var child = function (props) {
-    //If props==null, will throw errors during construction
-    if (props) {
-      // //Execute old constructor
-      // father.call(this, props);
-      // //Add new into child constructor
-      // addInObject.constructorPlus.call(this, props); //this.constructorPlus(props)
-      var res = new father(props);
-      addInObject.constructorPlus.call(res, props); //this.constructorPlus(props)
-      return res;
+  const { constructorPlus, prototypePlus } = addInObject;
+  class TempClass extends this {
+    constructor(props) {
+      super(props);
+      constructorPlus.call(this, props);
     }
-  };
-  //Inherit prototype from father, clear redundant properties inside father constructor
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  var fatherClean = function () {};
-  fatherClean.prototype = father.prototype;
-  child.prototype = new fatherClean();
-  child.prototype.constructor = child;
-  /*//We don't need properties constructed by {}, constructor not changed;
-    child.prototype.__proto__=father.prototype;//__proto__ isn't supported by IE9 and IE10, IE11 supports*/
-  //Add new functions into child.prototype
-  for (var attr in addInObject.prototypePlus) {
-    child.prototype[attr] = addInObject.prototypePlus[attr];
   }
-  /*****Add super&inherited pointer for instance*****/
-  //The upper constructor is super
-  child.prototype.super = father;
-  //Behaviors including constructor are inherited by child, can find depreciated
-  child.prototype.inherited = father.prototype; //Behavior always in prototype
-  /*****Generate super&inherited pointer link*****/
-  child.super = father;
-  child.inherited = father.prototype;
-  //Below is constructor link:
-  //Mutalisk.constructor.(prototype.constructor).(prototype.constructor)
-  return child;
+
+  for (var attr in prototypePlus) {
+    TempClass.prototype[attr] = prototypePlus[attr];
+  }
+
+  return TempClass;
 };
 
 //Extend Audio
@@ -157,38 +126,6 @@ _$.requestAnimationFrame =
   window.mozRequestAnimationFrame ||
   window.msRequestAnimationFrame ||
   window.oRequestAnimationFrame;
-
-_$.extends = function (fathers, addInObject) {
-  //Create child self as constructor function
-  var child = function (props) {
-    if (fathers instanceof Array) {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      var myself = this;
-      fathers.forEach(function (father) {
-        father.call(myself, props);
-      });
-      //Add new into child constructor
-      addInObject.constructorPlus.call(this, props);
-    } else throw '_$.extends need array type parameter fathers!';
-  };
-  if (fathers.length > 0) {
-    var mixinProto = fathers[0].prototype;
-    for (let N = 1; N < fathers.length; N++) {
-      //Mixin interfaces
-      mixinProto = _$.delegate(mixinProto, fathers[N].prototype);
-      //Still instanceof interface == false
-      mixinProto.constructor = fathers[N];
-    }
-    child.prototype = _$.delegate(mixinProto, addInObject.prototypePlus);
-    child.prototype.constructor = child;
-  } else {
-    //Original method
-    for (var attr in addInObject.prototypePlus) {
-      child.prototype[attr] = addInObject.prototypePlus[attr];
-    }
-  }
-  return child;
-};
 
 //_$.mixin == $.extend
 _$.mixin = function () {

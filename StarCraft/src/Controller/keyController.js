@@ -1,6 +1,6 @@
 import Map from '../Characters/Map';
 import $ from 'jquery';
-// import Button from '../Characters/Button';
+import Button from '../Characters/Button';
 import Game from '../GameRule/Game';
 import Cheat from '../GameRule/Cheat';
 

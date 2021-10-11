@@ -1,8 +1,9 @@
-import GlobalObject from './Gobj';
+import GlobalObject from './GlobalObject';
 import { Unit, AttackableUnit } from '../Characters/Units';
 import BurstStore from './BurstStore';
 import Building from './Building';
-// import Magic from './Magic';
+import Magic from './Magic';
+import BulletsStore from './BulletsStore';
 
 /******* Define Terran units *******/
 var Terran = {};
@@ -1083,5 +1084,14 @@ Terran.Civilian = Unit.extends({
     },
   },
 });
+
+
+Terran.Wraith.prototype.attackMode.flying.Bullet = BulletsStore.Missile;
+Terran.Wraith.prototype.attackMode.ground.Bullet = BulletsStore.SmallLaser;
+Terran.BattleCruiser.prototype.Bullet = BulletsStore.Laser;
+Terran.Firebat.prototype.Bullet = BulletsStore.Flame;
+Terran.Vulture.prototype.Bullet = BulletsStore.VultureBall;
+Terran.Goliath.prototype.attackMode.flying.Bullet = BulletsStore.LongMissile;
+Terran.Valkyrie.prototype.Bullet = BulletsStore.MultipleMissile;
 
 export default Terran;

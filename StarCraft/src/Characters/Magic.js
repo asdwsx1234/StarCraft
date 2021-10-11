@@ -1,17 +1,16 @@
-import Gobj from './Gobj';
+import GlobalObject from './GlobalObject';
 import $ from 'jquery';
-// import Button from './Button';
+import Button from './Button';
 import Zerg from './Zerg';
-// import Protoss from "./Protoss";
-// import Terran from "./Terran";
 import _$ from '../Utils/gFrame';
 import Building from './Building';
 import Game from '../GameRule/Game';
 import Resource from '../GameRule/Resource';
-// import Bullets from './Bullets';
+import BulletsStore from './BulletsStore';
 import { Unit } from './Units';
 import Cheat from '../GameRule/Cheat';
-// import Burst from './Burst';
+import Burst from './Burst';
+import BurstStore from './BurstStore';
 import Neutral from './Neutral';
 
 var Magic = {
@@ -154,14 +153,14 @@ var Magic = {
       if (location) {
         //Target enemy unit
         var target = Game.getSelectedOne(location.x, location.y, true, true);
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to fire parasite
           this.moveToward(target, this.get('sight'), function () {
             if (Resource.payCreditBill.call(myself)) {
               //Fire parasite
-              var bullet = new Bullets.Parasite({
+              var bullet = new BulletsStore.Parasite({
                 from: myself,
                 to: target,
                 damage: 0,
@@ -198,14 +197,14 @@ var Magic = {
           true,
           false
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to fire SpawnBroodlings
           this.moveToward(target, this.get('sight'), function () {
             if (Resource.payCreditBill.call(myself)) {
               //Fire SpawnBroodlings to kill that enemy immediately
-              var bullet = new Bullets.Parasite({
+              var bullet = new BulletsStore.Parasite({
                 from: myself,
                 to: target,
                 damage: 99999,
@@ -225,7 +224,7 @@ var Magic = {
       }
       //If missing location info, mark Button.callback, mouseController will call back with location
       else {
-        Button.callback = _$.hitch(arguments.callee, this);
+        // Button.callback = _$.hitch(arguments.callee, this);
         $('div.GameLayer').attr('status', 'button');
       }
     },
@@ -244,7 +243,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //Fire Ensnare
-            var bullet = new Bullets.Parasite({
+            var bullet = new BulletsStore.Parasite({
               from: myself,
               to: { x: location.x, y: location.y },
             });
@@ -252,7 +251,7 @@ var Magic = {
             //Fire Ensnare bullet with callback
             bullet.fire(function () {
               //Ensnare animation and sound
-              var anime = new Animation.Ensnare({
+              var anime = new BurstStore.Ensnare({
                 x: location.x,
                 y: location.y,
               });
@@ -277,7 +276,7 @@ var Magic = {
                 chara.buffer.Ensnare = true;
                 chara.addBuffer(bufferObj);
                 //Green effect
-                new Animation.GreenEffect({
+                new BurstStore.GreenEffect({
                   target: chara,
                   callback: function () {
                     if (chara.status != 'dead' && chara.buffer.Ensnare) {
@@ -313,13 +312,13 @@ var Magic = {
           true,
           false
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to consume
           this.moveToward(target, 70, function () {
             //Effect
-            var anime = new Animation.Consume({
+            var anime = new BurstStore.Consume({
               target: target,
               callback: function () {
                 //Consume sound
@@ -357,7 +356,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //DarkSwarm animation, play hidden frames at first
-            new Animation.DarkSwarm({
+            new BurstStore.DarkSwarm({
               x: location.x,
               y: location.y,
             }).action = 6;
@@ -391,7 +390,7 @@ var Magic = {
               });
               targets = [];
               var darkSwarms = Burst.allEffects.filter(function (effect) {
-                return effect instanceof Animation.DarkSwarm;
+                return effect instanceof BurstStore.DarkSwarm;
               });
               //Check if any swarm effect exist
               if (darkSwarms.length) {
@@ -444,7 +443,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //Plague animation and sound
-            var anime = new Animation.Plague({ x: location.x, y: location.y });
+            var anime = new BurstStore.Plague({ x: location.x, y: location.y });
             if (anime.insideScreen()) new Audio('bgm/Magic.Ensnare.wav').play();
             //Get in range enemy units
             var targets = Game.getInRangeOnes(
@@ -468,7 +467,7 @@ var Magic = {
               //HP losing every seconds
               chara.addBuffer(bufferObj);
               //Green effect
-              new Animation.RedEffect({
+              new BurstStore.RedEffect({
                 target: chara,
                 callback: function () {
                   if (chara.status != 'dead' && chara.buffer.Plague) {
@@ -595,14 +594,14 @@ var Magic = {
             return chara.isMachine() && !chara.buffer.Lockdown;
           }
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to fire lockdown
           this.moveToward(target, 300, function () {
             if (Resource.payCreditBill.call(myself)) {
               //Fire lockdown missile
-              var bullet = new Bullets.SingleMissile({
+              var bullet = new BulletsStore.SingleMissile({
                 from: myself,
                 to: target,
                 damage: 0,
@@ -625,7 +624,7 @@ var Magic = {
                   //Flag
                   target.buffer.Lockdown = true;
                   //Lockdown animation, show hidden frames first
-                  var anime = new Animation.Lockdown({
+                  var anime = new BurstStore.Lockdown({
                     target: target,
                     callback: function () {
                       //Restore after 60 seconds
@@ -666,7 +665,7 @@ var Magic = {
         var myself = this;
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           //Fire Nuclear bomb
-          var bullet = new Bullets.NuclearBomb({
+          var bullet = new BulletsStore.NuclearBomb({
             from: { x: location.x, y: location.y - 250 },
             to: { x: location.x, y: location.y },
           });
@@ -682,7 +681,7 @@ var Magic = {
               if (chara.life <= 0) chara.die();
             });
             //Nuclear animation
-            var anime = new Animation.NuclearStrike({
+            var anime = new BurstStore.NuclearStrike({
               x: location.x,
               y: location.y,
             });
@@ -724,7 +723,7 @@ var Magic = {
             return !chara.isMachine();
           }
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           this.targetLock = true;
           //Move toward target to heal him
           this.moveToward(target, 70, function () {
@@ -763,14 +762,14 @@ var Magic = {
       if (location) {
         //Restore all units
         var target = Game.getSelectedOne(location.x, location.y, null, true);
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to restore unit
           this.moveToward(target, 140, function () {
             if (Resource.payCreditBill.call(myself)) {
               //Restore effect
-              var anime = new Animation.Restoration({ target: target });
+              var anime = new BurstStore.Restoration({ target: target });
               //Restore sound
               if (anime.insideScreen())
                 new Audio('bgm/Magic.Restoration.wav').play();
@@ -798,7 +797,7 @@ var Magic = {
                 if (
                   effect.target == target &&
                   bufferAnimations.some(function (name) {
-                    return effect instanceof Animation[name];
+                    return effect instanceof BurstStore[name];
                   })
                 )
                   Burst.allEffects.splice(Burst.allEffects.indexOf(effect), 1);
@@ -830,14 +829,14 @@ var Magic = {
       if (location) {
         //Shoot enemy unit
         var target = Game.getSelectedOne(location.x, location.y, true, true);
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to fire optical flare
           this.moveToward(target, this.get('sight'), function () {
             if (Resource.payCreditBill.call(myself)) {
               //Fire optical flare
-              var bullet = new Bullets.VultureBall({
+              var bullet = new BulletsStore.VultureBall({
                 from: myself,
                 to: target,
                 damage: 0,
@@ -902,14 +901,14 @@ var Magic = {
             return !chara.buffer.DefensiveMatrix; //Not again
           }
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to activate defensive matrix
           this.moveToward(target, 250, function () {
             if (Resource.payCreditBill.call(myself)) {
               //Defensive matrix animation
-              var anime = new Animation.DefensiveMatrix({
+              var anime = new BurstStore.DefensiveMatrix({
                 target: target,
                 callback: function () {
                   //Restore after 60 seconds, if no restoration executed, or interrupted by enemy attack
@@ -931,7 +930,7 @@ var Magic = {
               var bufferObj = {
                 calculateDamageBy: function (enemyObj) {
                   var damage;
-                  if (enemyObj instanceof Gobj) {
+                  if (enemyObj instanceof GlobalObject) {
                     var enemyAttackType = enemyObj.attackType;
                     if (!enemyAttackType && enemyObj.attackMode) {
                       enemyAttackType = this.isFlying
@@ -984,7 +983,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //Fire EMPShockwave
-            var bullet = new Bullets.SingleMissile({
+            var bullet = new BulletsStore.SingleMissile({
               from: myself,
               to: { x: location.x, y: location.y },
             });
@@ -992,7 +991,7 @@ var Magic = {
             //Fire EMPShockwave bullet with callback
             bullet.fire(function () {
               //EMP shockwave animation
-              var anime = new Animation.EMPShockwave({
+              var anime = new BurstStore.EMPShockwave({
                 x: location.x,
                 y: location.y,
               });
@@ -1042,12 +1041,12 @@ var Magic = {
             return !chara.isMachine() && !chara.buffer.Irradiate;
           }
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           var irradiate = function (chara) {
             //Irradiate effect
-            var anime = new Animation.Irradiate({
+            var anime = new BurstStore.Irradiate({
               target: chara,
               callback: function () {
                 //Restore after 25 seconds, dealing 250 damage
@@ -1115,14 +1114,14 @@ var Magic = {
       if (location) {
         //Shoot all enemy
         var target = Game.getSelectedOne(location.x, location.y, true);
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to fire yamato
           this.moveToward(target, this.get('sight'), function () {
             if (Resource.payCreditBill.call(myself)) {
               //Fire yamato
-              var bullet = new Bullets.Yamato({
+              var bullet = new BulletsStore.Yamato({
                 from: myself,
                 to: target,
                 damage: 250,
@@ -1154,7 +1153,7 @@ var Magic = {
       if (location) {
         if (Resource.payCreditBill.call(this)) {
           //ScannerSweep animation
-          var anime = new Animation.ScannerSweep({
+          var anime = new BurstStore.ScannerSweep({
             x: location.x,
             y: location.y,
           });
@@ -1206,7 +1205,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //PsionicStorm animation
-            var anime = new Animation.PsionicStorm({
+            var anime = new BurstStore.PsionicStorm({
               x: location.x,
               y: location.y,
             });
@@ -1221,7 +1220,7 @@ var Magic = {
               targets = [];
               //Check if any psionic storm exist
               var psionicStorms = Burst.allEffects.filter(function (effect) {
-                return effect instanceof Animation.PsionicStorm;
+                return effect instanceof BurstStore.PsionicStorm;
               });
               if (psionicStorms.length) {
                 //Get targets inside all of swarms
@@ -1273,14 +1272,14 @@ var Magic = {
       if (location) {
         //Target all units
         var target = Game.getSelectedOne(location.x, location.y, null, true);
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to create 2 hallucinations
           this.moveToward(target, 245, function () {
             if (Resource.payCreditBill.call(myself)) {
               //Hallucination effect
-              var anime = new Animation.Hallucination({ target: target });
+              var anime = new BurstStore.Hallucination({ target: target });
               //Hallucination sound
               if (anime.insideScreen())
                 new Audio('bgm/Magic.Hallucination.wav').play();
@@ -1304,7 +1303,7 @@ var Magic = {
                   attackMode: halluAttackMode, //Might be undefined
                   cost: { man: 0 },
                   items: null,
-                  dieEffect: Burst.HallucinationDeath,
+                  dieEffect: BurstStore.HallucinationDeath,
                 },
               });
               for (var n = 0; n < 2; n++) {
@@ -1352,14 +1351,14 @@ var Magic = {
             return chara.MP;
           }
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to spell Feedback
           this.moveToward(target, 300, function () {
             if (Resource.payCreditBill.call(myself)) {
               //Feedback effect
-              var anime = new Animation.Feedback({ target: target });
+              var anime = new BurstStore.Feedback({ target: target });
               //Feedback sound
               if (anime.insideScreen())
                 new Audio('bgm/Magic.Feedback.wav').play();
@@ -1390,14 +1389,14 @@ var Magic = {
       if (location) {
         //Can control all enemy
         var target = Game.getSelectedOne(location.x, location.y, true);
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           var myself = this;
           this.targetLock = true;
           //Move toward target to mind control it
           this.moveToward(target, 280, function () {
             if (Resource.payCreditBill.call(myself)) {
               //Mind control animation
-              var anime = new Animation.MindControl({ target: target });
+              var anime = new BurstStore.MindControl({ target: target });
               //MindControl sound
               if (anime.insideScreen())
                 new Audio('bgm/Magic.MindControl.wav').play();
@@ -1453,7 +1452,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //MaelStorm spell animation
-            var anime = new Animation.MaelStormSpell({
+            var anime = new BurstStore.MaelStormSpell({
               x: location.x,
               y: location.y,
               callback: function () {
@@ -1483,7 +1482,7 @@ var Magic = {
                   //Buffer flag
                   target.buffer.MaelStorm = true;
                   //Mael storm effect
-                  new Animation.MaelStorm({
+                  new BurstStore.MaelStorm({
                     target: target,
                     callback: function () {
                       //Restore in 18 seconds
@@ -1550,7 +1549,7 @@ var Magic = {
         var myself = this;
         if (Resource.payCreditBill.call(myself)) {
           //Recall animation
-          var anime = new Animation.Recall({
+          var anime = new BurstStore.Recall({
             x: location.x,
             y: location.y,
             callback: function () {
@@ -1563,7 +1562,7 @@ var Magic = {
                 true
               );
               //Recall animation again
-              var animeII = new Animation.Recall({
+              var animeII = new BurstStore.Recall({
                 x: myself.posX(),
                 y: myself.posY(),
               });
@@ -1603,7 +1602,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //Spell StasisField animation
-            var anime = new Animation.StasisFieldSpell({
+            var anime = new BurstStore.StasisFieldSpell({
               x: location.x,
               y: location.y,
               callback: function () {
@@ -1636,7 +1635,7 @@ var Magic = {
                     target.stop();
                     clearInterval(target.dockTimer);
                     //Stasis field animation
-                    new Animation.StasisField({
+                    new BurstStore.StasisField({
                       target: target,
                       callback: function () {
                         //Restore in 30 seconds
@@ -1683,7 +1682,7 @@ var Magic = {
         this.moveTo(location.x, location.y, this.get('sight'), function () {
           if (Resource.payCreditBill.call(myself)) {
             //DisruptionWeb animation
-            var anime = new Animation.DisruptionWeb({
+            var anime = new BurstStore.DisruptionWeb({
               x: location.x,
               y: location.y,
             });
@@ -1704,7 +1703,7 @@ var Magic = {
               });
               targets = [];
               var disruptionWebs = Burst.allEffects.filter(function (effect) {
-                return effect instanceof Animation.DisruptionWeb;
+                return effect instanceof BurstStore.DisruptionWeb;
               });
               //Check if any disruption web exist
               if (disruptionWebs.length) {
@@ -1764,9 +1763,9 @@ var Magic = {
             return chara.SP && myself.canSee(chara);
           }
         );
-        if (target instanceof Gobj) {
+        if (target instanceof GlobalObject) {
           //Recharge shield animation
-          var anime = new Animation.RechargeShields({ target: target });
+          var anime = new BurstStore.RechargeShields({ target: target });
           //Recharge shield sound
           if (anime.insideScreen())
             new Audio('bgm/Magic.RechargeShields.wav').play();

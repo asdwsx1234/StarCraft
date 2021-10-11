@@ -1,8 +1,9 @@
-import Gobj from './Gobj';
+import GlobalObject from './GlobalObject';
 import { Unit, AttackableUnit } from '../Characters/Units';
 import BurstStore from './BurstStore';
 import Building from './Building';
-// import Magic from './Magic';
+import Magic from './Magic';
+import BulletsStore from './BulletsStore';
 
 /******* Define Zerg units *******/
 var Zerg = {};
@@ -347,7 +348,7 @@ Zerg.Overlord = Unit.extends({
     dieEffect: BurstStore.BigZergFlyingDeath,
     isFlying: true,
     unitType: Unit.BIG,
-    detector: Gobj.detectorBuffer,
+    detector: GlobalObject.detectorBuffer,
     recover: Building.ZergBuilding.prototype.recover,
     cost: {
       mine: 100,
@@ -1651,5 +1652,13 @@ Zerg.Larva = Unit.extends({
     },
   },
 });
+
+Zerg.Drone.prototype.Bullet = BulletsStore.Spooge;
+Zerg.Hydralisk.prototype.Bullet = BulletsStore.Spooge;
+Zerg.Lurker.prototype.Bullet = BulletsStore.Thorn;
+Zerg.Mutalisk.prototype.Bullet = BulletsStore.Darts;
+Zerg.Guardian.prototype.Bullet = BulletsStore.GreenBall;
+Zerg.Devourer.prototype.Bullet = BulletsStore.PurpleCloud;
+
 
 export default Zerg;

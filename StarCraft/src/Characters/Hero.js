@@ -5,6 +5,7 @@ import Terran from './Terran';
 import Protoss from './Protoss';
 import BurstStore from './BurstStore';
 import Neutral from './Neutral';
+import BulletsStore from './BulletsStore';
 
 /******* Define Hero units *******/
 var Hero = {};
@@ -346,5 +347,7 @@ Protoss.Reaver.prototype.scarabCapacity = [
   Protoss.Reaver.prototype.scarabCapacity,
 ];
 Protoss.Reaver.prototype.scarabCapacity.shareFlag = true;
+
+Hero.HeroCruiser.prototype.Bullet = BulletsStore.Yamato;
 
 export default Hero;

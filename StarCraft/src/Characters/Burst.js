@@ -1,4 +1,4 @@
-import GlobalObject from './Gobj';
+import GlobalObject from './GlobalObject';
 
 //One animation period which only play for a while and die
 class Burst extends GlobalObject {
@@ -59,11 +59,11 @@ class Burst extends GlobalObject {
     //Will show after constructed
     Burst.allEffects.push(this);
   }
-  //Override Gobj method
+  //Override GlobalObject method
   animeFrame() {
     //Animation play
     this.action++;
-    //Override Gobj here, can have hidden frames
+    //Override GlobalObject here, can have hidden frames
     var arrLimit =
       this.imgPos[this.status].left instanceof Array
         ? this.imgPos[this.status].left.length
@@ -102,4 +102,5 @@ class Burst extends GlobalObject {
     super.die.call(this);
   }
 }
+
 export default Burst;

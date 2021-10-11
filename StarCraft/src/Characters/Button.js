@@ -1,4 +1,4 @@
-import Gobj from './Gobj';
+import GlobalObject from './GlobalObject';
 import $ from 'jquery';
 import Game from '../GameRule/Game';
 import { Unit } from './Units';
@@ -12,8 +12,50 @@ import Terran from './Terran';
 import Protoss from './Protoss';
 import Referee from '../GameRule/Referee';
 import mouseController from '../Controller/mouseController';
-// import Burst from './Burst';
-// console.log('Burst: ', Burst);
+import BurstStore from './BurstStore';
+
+GlobalObject.prototype.addBuffer = function (bufferObj, onAll) {
+  // FIXME: 放到Button文件去修改，否则会造成循环依赖
+  for (var prop in bufferObj) {
+    //Register in override if not exist
+    if (!this.override[prop]) this.override[prop] = [];
+    var buffer = bufferObj[prop];
+    //Add buffer into override list
+    this.override[prop].unshift(buffer);
+    //Override unit property by time sequence if has
+    if (this[prop] != null || prop == 'isInvisible' || onAll)
+      this[prop] = buffer;
+  }
+  this.bufferObjs.push(bufferObj);
+  //Refresh
+  if (this == Game.selectedUnit) Button.reset();
+};
+
+GlobalObject.prototype.removeBuffer = function (bufferObj) {
+  // FIXME: 放到Button文件去修改，否则会造成循环依赖
+  var bufferObjIndex = this.bufferObjs.indexOf(bufferObj);
+  //Buffer obj still exist, will not remove twice
+  if (bufferObjIndex != -1) {
+    for (var prop in bufferObj) {
+      var buffer = bufferObj[prop];
+      var overrideList = this.override[prop];
+      //Remove buffer from override list
+      var index = overrideList.indexOf(buffer);
+      if (index != -1) overrideList.splice(index, 1);
+      //Have other buffer, apply it by time sequence
+      if (overrideList.length > 0) this[prop] = overrideList[0];
+      else delete this[prop];
+    }
+    //Remove from bufferObjs
+    this.bufferObjs.splice(bufferObjIndex, 1);
+    //Refresh
+    if (this == Game.selectedUnit) Button.reset();
+    //Remove successfully
+    return true;
+  }
+  //Remove failure
+  else return false;
+};
 
 const Button = {
   callback: null,
@@ -101,11 +143,11 @@ const Button = {
           if (larvas.length) {
             Game.unselectAll();
             Game.addIntoAllSelected(larvas, true);
-            if (larvas[0] instanceof Gobj) {
-              Game.changeSelectedTo(larvas[0]);
-              //Sound effect
-              larvas[0].sound.selected.play();
-            }
+            // if (larvas[0] instanceof Gobj) {
+            //   Game.changeSelectedTo(larvas[0]);
+            //   //Sound effect
+            //   larvas[0].sound.selected.play();
+            // }
           }
         }
       });
@@ -895,7 +937,7 @@ const Button = {
           const clickY = event.pageY - offset.top;
           const location = { x: clickX + Map.offsetX, y: clickY + Map.offsetY };
           //Show right click cursor
-          new Burst.RightClickCursor(location);
+          new BurstStore.RightClickCursor(location);
           //Call back with location info
           Button.callback(location);
         }

@@ -1,4 +1,4 @@
-import Gobj from '../Characters/Gobj';
+import GlobalObject from '../Characters/GlobalObject';
 import Map from '../Characters/Map';
 import Game from './Game';
 import Cheat from './Cheat';
@@ -23,7 +23,7 @@ var Levels = [
       //Apply race style
       Game.race.choose('Terran');
       //Load units
-      new Terran.BattleCruiser({ x: 100, y: 100 });
+      new Terran.BattleCruiser({ x: 700, y: 100 });
       new Terran.Wraith({ x: 200, y: 100 });
       new Terran.BattleCruiser({ x: 100, y: 200 });
       new Terran.Wraith({ x: 200, y: 200 });
@@ -31,7 +31,7 @@ var Levels = [
       new Terran.Wraith({ x: 200, y: 300 });
       new Terran.SCV({ x: 100, y: 400 });
       new Zerg.Drone({ x: 150, y: 400 });
-      new Protoss.Probe({ x: 200, y: 400 });
+      // new Protoss.Probe({ x: 200, y: 400 });
       //Add enemy
       new Terran.SCV({ x: 600, y: 400, isEnemy: true });
       new Zerg.Mutalisk({ x: 700, y: 100, isEnemy: true });
@@ -609,7 +609,7 @@ var Levels = [
       //Override
       BuildingStore.ProtossBuilding.Pyramid.prototype.HP = 3000;
       BuildingStore.ProtossBuilding.Pyramid.prototype.SP = 3000;
-      BuildingStore.ProtossBuilding.Pyramid.prototype.detector = Gobj.detectorBuffer;
+      BuildingStore.ProtossBuilding.Pyramid.prototype.detector = GlobalObject.detectorBuffer;
       //Patch: Overlord speed up
       Upgrade.EvolvePneumatizedCarapace.effect(true);
       Upgrade.IncreaseCarrierCapacity.effect(true);

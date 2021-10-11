@@ -1,10 +1,10 @@
-import Gobj from '../Characters/Gobj';
+import GlobalObject from '../Characters/GlobalObject';
 import $ from 'jquery';
 import Map from '../Characters/Map';
 import Game from '../GameRule/Game';
-// import Button from '../Characters/Button';
+import Button from '../Characters/Button';
 import keyController from './keyController';
-// import Burst from '../Characters/Burst';
+import BurstStore from '../Characters/BurstStore';
 import { Unit } from '../Characters/Units';
 import Building from '../Characters/Building';
 import Resource from '../GameRule/Resource';
@@ -41,7 +41,7 @@ var mouseController = {
       //Multi select will keep selected status and do nothing
       if (!mouseController.isMultiSelect()) Game.unselectAll();
       //If has selected one
-      if (selectedOne instanceof Gobj) {
+      if (selectedOne instanceof GlobalObject) {
         //Sound effect
         selectedOne.sound.selected.play();
         //Cannot multiSelect with enemy
@@ -71,7 +71,7 @@ var mouseController = {
     //Intercept event inside infoBox
     if (clickY > Game.infoBox.y) return;
     //Show right click cursor
-    new Burst.RightClickCursor({
+    new BurstStore.RightClickCursor({
       x: clickX + Map.offsetX,
       y: clickY + Map.offsetY,
     });
@@ -105,7 +105,7 @@ var mouseController = {
           }
           //Unit cannot attack will always choose move mode
           var attackOrMove = chara.attack
-            ? selectedEnemy instanceof Gobj
+            ? selectedEnemy instanceof GlobalObject
             : false;
           //Attack mode
           if (attackOrMove) {

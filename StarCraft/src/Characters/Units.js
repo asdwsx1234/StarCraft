@@ -1,7 +1,7 @@
 import _$ from '../Utils/gFrame';
-import GlobalObject from './Gobj';
-// import Building from './Building';
-// import Map from './Map';
+import GlobalObject from './GlobalObject';
+import Building from './Building';
+import Map from './Map';
 // import Referee from '../GameRule/Referee';
 
 //Define unit which has HP/direction and be selectable, unattackable unit
@@ -165,9 +165,6 @@ export class Unit extends GlobalObject {
     }, 2000);
   };
 
-  name = 'Unit';
-  isFlying = true;
-
   constructor(props) {
     super(props);
     //Add id for unit
@@ -204,11 +201,14 @@ export class Unit extends GlobalObject {
     }, 0);
   }
 
-  //Override Gobj method
+  //Override GlobalObject method
   animeFrame() {
     //Animation play
     this.action++;
-    //Override Gobj here, support hidden frames
+    //Override GlobalObject here, support hidden frames
+    // console.log(this);
+    // console.log('this.status: ', this.status);
+    // console.log('this.imgPos: ', this.imgPos);
     var arrLimit =
       this.imgPos[this.status].left[0] instanceof Array
         ? this.imgPos[this.status].left[0].length
@@ -571,6 +571,10 @@ export class Unit extends GlobalObject {
   }
 }
 
+Unit.prototype.name = 'Unit';
+
+Unit.prototype.isFlying = true;
+
 export class AttackableUnit extends Unit {
   //Attack type
   static NORMAL_ATTACK = 0;
@@ -651,9 +655,6 @@ export class AttackableUnit extends Unit {
     //Add attack sound for AttackableUnit
     this.sound.attack = new Audio('bgm/' + this.name + '.attack.wav');
   }
-
-  //Add basic unit info
-  name = 'AttackableUnit';
 
   isInAttackRange(enemy) {
     return enemy.inside({
@@ -1091,3 +1092,6 @@ export class AttackableUnit extends Unit {
     this.selected = false;
   }
 }
+
+//Add basic unit infon
+AttackableUnit.prototype.name = 'AttackableUnit';

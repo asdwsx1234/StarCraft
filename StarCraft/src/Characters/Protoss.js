@@ -1,10 +1,11 @@
-import GlobalObject from './Gobj';
+import GlobalObject from './GlobalObject';
 import { Unit, AttackableUnit } from '../Characters/Units';
 import BurstStore from './BurstStore';
 import Building from './Building';
 import Magic from './Magic';
 import $ from 'jquery';
 import Game from '../GameRule/Game';
+import BulletsStore from './BulletsStore';
 
 /******* Define Protoss units *******/
 var Protoss = {};
@@ -1243,5 +1244,12 @@ Protoss.Corsair = AttackableUnit.extends({
     },
   },
 });
+
+Protoss.Dragoon.prototype.Bullet = BulletsStore.DragoonBall;
+Protoss.Archon.prototype.Bullet = BulletsStore.ArchonLightening;
+Protoss.Reaver.prototype.Bullet = BulletsStore.ReaverBomb;
+Protoss.Scout.prototype.attackMode.flying.Bullet = BulletsStore.ScoutMissile;
+Protoss.Arbiter.prototype.Bullet = BulletsStore.DragoonBall;
+Protoss.Carrier.prototype.Bullet = BulletsStore.Interceptor;
 
 export default Protoss;

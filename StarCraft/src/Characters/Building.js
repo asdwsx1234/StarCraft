@@ -1,8 +1,6 @@
-import GlobalObject from './Gobj';
+import GlobalObject from './GlobalObject';
 import BurstStore from './BurstStore';
 import { Unit, AttackableUnit } from '../Characters/Units';
-//TODO 循环引用了
-// import Referee from '../GameRule/Referee';
 
 class Building extends GlobalObject {
   constructor(props) {
@@ -27,14 +25,11 @@ class Building extends GlobalObject {
     }, 0);
   }
 
-  name = 'Building';
-  armor = 0;
-  sight = 385;
   //Override to support multiple hidden frames
   animeFrame() {
     //Animation play
     this.action++;
-    //Override Gobj here, building doesn't have direction
+    //Override GlobalObject here, building doesn't have direction
     var arrLimit =
       this.imgPos[this.status].left instanceof Array
         ? this.imgPos[this.status].left.length
@@ -114,6 +109,10 @@ class Building extends GlobalObject {
     return lifeRatio > 0.7 ? 'green' : lifeRatio > 0.3 ? 'yellow' : 'red';
   }
 }
+
+Building.prototype.name = 'Building';
+Building.prototype.armor = 0;
+Building.prototype.sight = 385;
 
 //Store all buildings
 Building.allBuildings = [];
@@ -200,177 +199,7 @@ Building.Attackable = {
     isInAttackRange: AttackableUnit.prototype.isInAttackRange,
     matchAttackLimit: AttackableUnit.prototype.matchAttackLimit,
     attack: function (enemy) {
-      //Cannot attack invisible unit or unit who mismatch your attack type
-      if (enemy.isInvisible || !this.matchAttackLimit(enemy)) {
-        Referee.voice.pError.play();
-        this.stopAttack();
-        return;
-      }
-      if (enemy instanceof GlobalObject && enemy.status != 'dead') {
-        //Stop old attack and moving
-        this.stopAttack();
-        this.dock();
-        //New attack
-        this.target = enemy;
-        var myself = this;
-        var attackFrame = function () {
-          //If enemy already dead or becomes invisible or we just miss enemy
-          if (
-            enemy.status == 'dead' ||
-            enemy.isInvisible ||
-            myself.isMissingTarget()
-          ) {
-            myself.stopAttack();
-            myself.dock();
-          } else {
-            //Cannot come in until reload cool down, only dock down can finish attack animation
-            if (myself.isReloaded()) {
-              //Load bullet
-              myself.coolDown = false;
-              //Cool down after attack interval
-              setTimeout(function () {
-                myself.coolDown = true;
-              }, myself.get('attackInterval'));
-              //If AOE, init enemies
-              var enemies;
-              if (myself.AOE) {
-                //Get possible targets
-                if (myself.isEnemy) {
-                  enemies = myself.attackLimit
-                    ? myself.attackLimit == 'flying'
-                      ? Unit.ourFlyingUnits
-                      : Unit.ourGroundUnits.concat(Building.ourBuildings)
-                    : Unit.allOurUnits().concat(Building.ourBuildings);
-                } else {
-                  enemies = myself.attackLimit
-                    ? myself.attackLimit == 'flying'
-                      ? Unit.enemyFlyingUnits
-                      : Unit.enemyGroundUnits.concat(Building.enemyBuildings)
-                    : Unit.allEnemyUnits().concat(Building.enemyBuildings);
-                }
-                //Range filter
-                switch (myself.AOE.type) {
-                  case 'LINE':
-                    //Calculate inter-points between enemy
-                    var N = Math.ceil(
-                      myself.distanceFrom(enemy) / myself.AOE.radius
-                    );
-                    enemies = enemies.filter(function (chara) {
-                      for (var n = 1; n <= N; n++) {
-                        var X =
-                          myself.posX() +
-                          (n * (enemy.posX() - myself.posX())) / N;
-                        var Y =
-                          myself.posY() +
-                          (n * (enemy.posY() - myself.posY())) / N;
-                        if (
-                          chara.insideCircle({
-                            centerX: X >> 0,
-                            centerY: Y >> 0,
-                            radius: myself.AOE.radius,
-                          }) &&
-                          !chara.isInvisible
-                        ) {
-                          return true;
-                        }
-                      }
-                      return false;
-                    });
-                    break;
-                  //Default type is CIRCLE
-                  case 'CIRCLE':
-                  default:
-                    enemies = enemies.filter(function (chara) {
-                      return (
-                        chara.insideCircle({
-                          centerX: enemy.posX(),
-                          centerY: enemy.posY(),
-                          radius: myself.AOE.radius,
-                        }) && !chara.isInvisible
-                      );
-                    });
-                }
-              }
-              //Show attack animation if has
-              if (myself.imgPos.attack) {
-                myself.action = 0;
-                //Change status to show attack frame
-                myself.status = 'attack';
-                //Will return to dock after attack
-                setTimeout(function () {
-                  //If still show attack
-                  if (myself.status == 'attack') {
-                    myself.status = 'dock';
-                    myself.action = 0;
-                  }
-                }, myself.frame.attack * 100); //attackAnimation < attackInterval
-              }
-              //If has bullet
-              if (myself.Bullet) {
-                //Will shoot multiple bullets in one time
-                if (myself.continuousAttack) {
-                  myself.bullet = [];
-                  for (let N = 0; N < myself.continuousAttack.count; N++) {
-                    var bullet = new myself.Bullet({
-                      from: myself,
-                      to: enemy,
-                    });
-                    //Reassign bullets location
-                    if (myself.continuousAttack.layout)
-                      myself.continuousAttack.layout(bullet, N);
-                    if (myself.continuousAttack.onlyOnce && N != 0) {
-                      bullet.noDamage = true;
-                    }
-                    bullet.fire();
-                    myself.bullet.push(bullet);
-                  }
-                } else {
-                  //Reload one new bullet
-                  myself.bullet = new myself.Bullet({
-                    from: myself,
-                    to: enemy,
-                  });
-                  myself.bullet.fire();
-                }
-              }
-              //Else will cause damage immediately (melee attack)
-              else {
-                //Cause damage when burst appear, after finish whole melee attack action
-                if (myself.AOE) {
-                  enemies.forEach(function (chara) {
-                    chara.getDamageBy(myself);
-                    chara.reactionWhenAttackedBy(myself);
-                  });
-                } else {
-                  //Cause damage after finish whole melee attack action
-                  setTimeout(function () {
-                    enemy.getDamageBy(myself);
-                    enemy.reactionWhenAttackedBy(myself);
-                  }, myself.frame.attack * 100);
-                }
-              }
-              //If has attack effect (burst)
-              if (myself.attackEffect) {
-                if (myself.AOE && myself.AOE.hasEffect) {
-                  enemies.forEach(function (chara) {
-                    new myself.attackEffect({
-                      x: chara.posX(),
-                      y: chara.posY(),
-                    });
-                  });
-                } else {
-                  new myself.attackEffect({ x: enemy.posX(), y: enemy.posY() });
-                }
-              }
-              //Sound effect, missile attack unit will play sound when bullet fire
-              if (!myself.Bullet && myself.insideScreen())
-                myself.sound.attack.play();
-            }
-          }
-        };
-        attackFrame(); //Add one missing frame
-        this.attackTimer = setInterval(attackFrame, 100);
-      }
+      // FIXME: 循环依赖，放到Referee里去实现了
     },
     stopAttack: AttackableUnit.prototype.stopAttack,
     findNearbyTargets: function () {
@@ -451,6 +280,11 @@ Building.Attackable = {
       this.selected = false;
     },
   },
+};
+
+// Patch, 如果放在GlobalObject文件里定义，import Building会导致循环引用
+GlobalObject.prototype.cannotMove = function () {
+  return this instanceof Building || Boolean(this.burrowBuffer);
 };
 
 export default Building;

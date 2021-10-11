@@ -1,6 +1,7 @@
 import Building from './Building';
+import BulletsStore from './BulletsStore';
 import BurstStore from './BurstStore';
-import GlobalObject from './Gobj';
+import GlobalObject from './GlobalObject';
 import { AttackableUnit } from './Units';
 
 const BuildingStore = {
@@ -2369,5 +2370,11 @@ BuildingStore.ProtossBuilding.Tranfer = Building.ProtossBuilding.extends({
     sight: 350,
   },
 });
+
+BuildingStore.ZergBuilding.SporeColony.prototype.Bullet = BulletsStore.Spore;
+BuildingStore.TerranBuilding.MissileTurret.prototype.Bullet =
+  BulletsStore.SingleMissile;
+BuildingStore.ProtossBuilding.PhotonCannon.prototype.Bullet =
+  BulletsStore.DragoonBall;
 
 export default BuildingStore;

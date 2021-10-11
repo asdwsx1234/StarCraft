@@ -1,4 +1,4 @@
-import Gobj from '../Characters/Gobj';
+import GlobalObject from '../Characters/GlobalObject';
 import $ from 'jquery';
 import _$ from '../Utils/gFrame';
 import sourceLoader from '../Utils/sourceLoader';
@@ -8,11 +8,11 @@ import Map from '../Characters/Map';
 import mouseController from '../Controller/mouseController';
 import keyController from '../Controller/keyController';
 import Building from '../Characters/Building';
-// import Bullets from '../Characters/Bullets';
+import Bullets from '../Characters/Bullets';
 import { Unit } from '../Characters/Units';
-// import Burst from '../Characters/Burst';
+import Burst from '../Characters/Burst';
 import Referee from './Referee';
-// import Button from '../Characters/Button';
+import Button from '../Characters/Button';
 import Upgrade from '../Characters/Upgrade';
 
 var Game = {
@@ -37,7 +37,7 @@ var Game = {
   allSelected: [],
   _oldAllSelected: [],
   addIntoAllSelected: function (chara, override) {
-    if (chara instanceof Gobj) {
+    if (chara instanceof GlobalObject) {
       //Add into allSelected if not included
       if (Game.allSelected.indexOf(chara) == -1) {
         if (override) Game.allSelected = chara;
@@ -254,7 +254,7 @@ var Game = {
         if (chara.status == 'dead') team.splice(team.indexOf(chara), 1);
       });
       Game.addIntoAllSelected(team, true);
-      if (team[0] instanceof Gobj) {
+      if (team[0] instanceof GlobalObject) {
         Game.changeSelectedTo(team[0]);
         //Sound effect
         team[0].sound.selected.play();
@@ -434,12 +434,12 @@ var Game = {
   changeSelectedTo: function (chara) {
     Game.selectedUnit = chara;
     Button.equipButtonsFor(chara);
-    if (chara instanceof Gobj) {
+    if (chara instanceof GlobalObject) {
       chara.selected = true;
     }
     //Show selected living unit info
     if (
-      Game.selectedUnit instanceof Gobj &&
+      Game.selectedUnit instanceof GlobalObject &&
       Game.selectedUnit.status != 'dead'
     ) {
       //Display info
@@ -548,7 +548,7 @@ var Game = {
   },
   draw: function (chara) {
     //Can draw units and no-rotate bullets
-    if (!(chara instanceof Gobj)) return; //Will only show Gobj
+    if (!(chara instanceof GlobalObject)) return; //Will only show GlobalObject
     if (chara.status == 'dead') return; //Will not show dead
     //Won't draw units outside screen
     if (!chara.insideScreen()) return;
@@ -860,7 +860,7 @@ var Game = {
   drawInfoBox: function () {
     //Update selected unit active info which need refresh
     if (
-      Game.selectedUnit instanceof Gobj &&
+      Game.selectedUnit instanceof GlobalObject &&
       Game.selectedUnit.status != 'dead'
     ) {
       //Update selected unit life,shield and magic

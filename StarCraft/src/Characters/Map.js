@@ -4,8 +4,18 @@ import sourceLoader from '../Utils/sourceLoader';
 import _$ from '../Utils/gFrame';
 import Building from './Building';
 import { Unit } from './Units';
-// import Burst from './Burst';
+import Burst from './Burst';
+import BurstStore from './BurstStore';
+import GlobalObject from './GlobalObject';
 
+GlobalObject.prototype.insideScreen = function () {
+  return (
+    this.x + this.width > Map.offsetX &&
+    this.x < Map.offsetX + Game.HBOUND &&
+    this.y + this.height > Map.offsetY &&
+    this.y < Map.offsetY + Game.VBOUND
+  );
+};
 
 var Map = {
   currentMap: 'Switchback', //By default
@@ -63,7 +73,7 @@ var Map = {
         return chara.buffer.Parasite;
       });
       var scannerSweeps = Burst.allEffects.filter(function (anime) {
-        return Animation.getName(anime) == 'ScannerSweep';
+        return BurstStore.getName(anime) == 'ScannerSweep';
       });
       var addInObjs = parasitedEnemies.concat(scannerSweeps);
       //Clear fog
